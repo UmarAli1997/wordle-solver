@@ -1,5 +1,7 @@
 # Wordle Solver
 
+from collections import Counter
+
 def wordle_solver():
 
     word_list = get_words("word_files/valid-wordle-words.txt")
@@ -21,8 +23,22 @@ def get_words(file):
 
     return word_list
 
+def score_words(word_list):
+
+    # Initialise variable
+    letter_freq = Counter()
+    for word in word_list:
+        letter_freq += Counter(word)
+
+    #letter_freq = (letter_freq.values()/len(word_list) for key, value in letter_freq.items())
+    print(letter_freq)
+    return
+
 def filter_words(guess_word, guess_result, word_list):
 
     for result, index in enumerate(guess_result):
-        if result == "x" and word_list[]
+        if result == "x":
+            word_list = [word_list for word in word_list]
     return
+
+score_words(get_words("word_files/valid-wordle-words.txt"))

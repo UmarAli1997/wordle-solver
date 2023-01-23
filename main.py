@@ -54,7 +54,7 @@ def score_words(word_list: list, letter_freq: Counter):
 
     return best_guess
 
-def filter_words(guess_word: str, guess_result: str, word_list: list):  # Need to fix this function, it doesn't filter words correctly
+def filter_words(guess_word: str, guess_result: str, word_list: list):
 
     # Loops through each element of the guess_result string and compares the equivalent index of guess_word with each word in the word_list
     # Removes words from the word_list if it does not satify the if else block
@@ -67,22 +67,32 @@ def filter_words(guess_word: str, guess_result: str, word_list: list):  # Need t
     if guess_result == "ggggg":
         print("Congrats!")
 
+    correct_letters = []
+
     for index, result in enumerate(guess_result):
         if result == "x":
             for word in word_list[:]:
-                if guess_word[index] in word[index]:
+                if word[index] not in correct_letters:
+                    word_list.remove(word)
+                elif guess_word[index] in word[index]:
                     word_list.remove(word)
 
         elif result == "y":
             for word in word_list[:]:
-                if guess_word[index] not in word[index]:
+                if guess_word[index] not in word:
                     word_list.remove(word)
+                elif guess_word[index] == word[index]:
+                    word_list.remove(word)
+                    if word[index] not in correct_letters:
+                        correct_letters.append(word[index])
 
         elif result == "g":
             for word in word_list[:]:
                 if guess_word[index] != word[index]:
                     #print(word[index])
                     word_list.remove(word)
+                    if word[index] not in correct_letters:
+                        correct_letters.append(word[index])
 
     return word_list
 

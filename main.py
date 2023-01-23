@@ -1,6 +1,7 @@
 # Wordle Solver
 
 from collections import Counter
+import string
 
 def wordle_solver():
 
@@ -41,6 +42,9 @@ def letter_frequency(word_list: list):
 
 def score_words(word_list: list, letter_freq: Counter):
 
+    if len(word_list) <= 2:
+        return word_list[0]
+
     # Initialise dictionary to store word scores
     word_scores = {key: 0 for key in word_list}
 
@@ -54,55 +58,63 @@ def score_words(word_list: list, letter_freq: Counter):
 
     return best_guess
 
+def is_possible_word(word: str, allowed_letters: set, yellow_letters: set):
+
+    for index, letter in enumerate(word):
+        if letter not in allowed_letters[index]:
+            return False
+
+        for yellow_letter in yellow_letters:
+            if yellow_letter not in word:
+                return False
+        return True
+
+def find_possible_words(word_list, allowed_letters, yellow_letters):
+    word_list = [word for word in word_list if is_possible_word(word, allowed_letters, yellow_letters)]
+    return word_list
+
 def filter_words(guess_word: str, guess_result: str, word_list: list):
-
-    # Loops through each element of the guess_result string and compares the equivalent index of guess_word with each word in the word_list
-    # Removes words from the word_list if it does not satify the if else block
-    # Likely a better way to search through this
-
     # x = Grey, letter does not exist in the solution
     # y = Yellow, letter does exist in the solution but is not in the correct index
     # g =  Green, letter does exist in the solution and is in the correct index
 
     if guess_result == "ggggg":
         print("Congrats!")
-
-    correct_letters = []
+        exit()
 
     for index, result in enumerate(guess_result):
+
+        letter = guess_word[index]
+
         if result == "x":
-            for word in word_list[:]:
-                if word[index] not in correct_letters:
-                    word_list.remove(word)
-                elif guess_word[index] in word[index]:
-                    word_list.remove(word)
+            for idx, letter_set in enumerate(allowed_letters):
+                if letter in letter_set:
+                    allowed_letters[idx].remove(letter)
 
-        elif result == "y":
-            for word in word_list[:]:
-                if guess_word[index] not in word:
-                    word_list.remove(word)
-                elif guess_word[index] == word[index]:
-                    word_list.remove(word)
-                    if word[index] not in correct_letters:
-                        correct_letters.append(word[index])
+        elif result == "y":                             # Need to fix this here
+            yellow_letters.add(letter)
+            if letter in allowed_letters[index]:
+                allowed_letters[index].remove(letter)
 
-        elif result == "g":
-            for word in word_list[:]:
-                if guess_word[index] != word[index]:
-                    #print(word[index])
-                    word_list.remove(word)
-                    if word[index] not in correct_letters:
-                        correct_letters.append(word[index])
+        if result == "g":
+            allowed_letters[index] = {letter}
 
+    word_list = find_possible_words(word_list, allowed_letters, yellow_letters)
+    print(word_list)
     return word_list
 
 
 # Main loop
-MAX_GUESSES = 6
+MAX_GUESSES = 5
 count = 0
 
 word_list = get_words("word_files/valid-wordle-words.txt")
 letter_freq = letter_frequency(word_list)
+
+# 5 Sets of the alphabet to filter down
+allowed_letters = [set(string.ascii_lowercase), set(string.ascii_lowercase), set(string.ascii_lowercase), set(string.ascii_lowercase), set(string.ascii_lowercase)]
+# Letters that exist in the word but are not in the correct position
+yellow_letters = set()
 
 while count <= MAX_GUESSES:
     user_guess = input("Enter your guess: ")

@@ -59,21 +59,29 @@ def score_words(word_list: list, letter_freq: Counter):
     return best_guess
 
 def is_possible_word(word: str, allowed_letters: set, yellow_letters: set):
+    # Function loops through each letter in a word and checks if it exists
+    # or not in each set. If the letter does not exist in a possible solution
+    # the word is not added to the new word list.
 
+    # Loop to check if all the letters in the word are contained within the allowed_letters sets
     for index, letter in enumerate(word):
         if letter not in allowed_letters[index]:
             return False
 
-        for yellow_letter in yellow_letters:
-            if yellow_letter not in word:
-                return False
-        return True
+    # If all the letters are allowed, check if they contain a yellow letter
+    # If they do, then it is added to the new list
+    for yellow_letter in yellow_letters:
+        if yellow_letter not in word:
+            return False
+    return True
 
 def find_possible_words(word_list, allowed_letters, yellow_letters):
+    # Function builds a new list containing only possible words
     word_list = [word for word in word_list if is_possible_word(word, allowed_letters, yellow_letters)]
     return word_list
 
-def filter_words(guess_word: str, guess_result: str, word_list: list):
+def filter_letters(guess_word: str, guess_result: str, word_list: list):
+    # Function filters letters from the set of letters allowed in each position
     # x = Grey, letter does not exist in the solution
     # y = Yellow, letter does exist in the solution but is not in the correct index
     # g =  Green, letter does exist in the solution and is in the correct index
@@ -83,22 +91,28 @@ def filter_words(guess_word: str, guess_result: str, word_list: list):
         exit()
 
     for index, result in enumerate(guess_result):
-
         letter = guess_word[index]
 
+        # If result is grey, remove the letter from all sets
         if result == "x":
             for idx, letter_set in enumerate(allowed_letters):
-                if letter in letter_set:
+                if letter in letter_set and len(letter_set) > 1:
                     allowed_letters[idx].remove(letter)
 
-        elif result == "y":                             # Need to fix this here
+        # If the result is yellow, remove the letter from the set
+        # of the corresponding index and add the letter to a seperate
+        # set of letters that must exist in the answer
+        elif result == "y":
             yellow_letters.add(letter)
             if letter in allowed_letters[index]:
                 allowed_letters[index].remove(letter)
 
-        if result == "g":
+        # If the result is green, make the set at the corresponding index
+        # contain only the green letter as it is correct
+        elif result == "g":
             allowed_letters[index] = {letter}
 
+    # Call function to filter the word list down
     word_list = find_possible_words(word_list, allowed_letters, yellow_letters)
     print(word_list)
     return word_list
@@ -124,6 +138,6 @@ y = Yellow
 x = Grey
 : ''')
 
-    word_list = filter_words(user_guess, guess_result, word_list)
+    word_list = filter_letters(user_guess, guess_result, word_list)
     best_guess = score_words(word_list, letter_freq)
     print(f"Your best guess would be: {best_guess}\n")

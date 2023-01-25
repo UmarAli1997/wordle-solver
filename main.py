@@ -2,14 +2,28 @@
 
 from collections import Counter
 import string
+from sys import argv
 
-def wordle_solver():
+def play_wordle():
 
     word_list = get_words("word_files/valid-wordle-words.txt")
+    answer_list = get_words("word_files/wordle-answers.txt")
+    score_list = []
+    letter_freq = letter_frequency(word_list)
+
+    # 5 Sets of the alphabet to filter down
+    allowed_letters = [set(string.ascii_lowercase), set(string.ascii_lowercase), set(string.ascii_lowercase), set(string.ascii_lowercase), set(string.ascii_lowercase)]
+    # Letters that exist in the word but are not in the correct position
+    yellow_letters = set()
 
     # Guesses taken from MITs paper
     # https://auction-upload-files.s3.amazonaws.com/Wordle_Paper_Final.pdf
     optimal_guesses = ["salet", "reast", "trace", "crate", "slate"]
+
+    for guess in optimal_guesses:
+        for answer in answer_list:
+            break
+
     return
 
 def get_words(file: str):
@@ -42,6 +56,7 @@ def letter_frequency(word_list: list):
 
 def score_words(word_list: list, letter_freq: Counter):
 
+    # If there are only 2 words left in the list take the first as it is a 50/50
     if len(word_list) <= 2:
         return word_list[0]
 
@@ -52,6 +67,10 @@ def score_words(word_list: list, letter_freq: Counter):
     for word in word_list:
         for letter in word:
             word_scores[word] += letter_freq[letter]
+
+    # Simple weighting algorithm to encourage more unique letters in words over the same repeating letters
+    for word, score in word_scores.items():
+        word_scores[word] = score / (5 - len(set(word)) + 1)
 
     # Returns the highest scoring word
     best_guess = max(word_scores, key=word_scores.get)
@@ -75,7 +94,7 @@ def is_possible_word(word: str, allowed_letters: set, yellow_letters: set):
             return False
     return True
 
-def find_possible_words(word_list, allowed_letters, yellow_letters):
+def find_possible_words(word_list: list, allowed_letters: set, yellow_letters: set):
     # Function builds a new list containing only possible words
     word_list = [word for word in word_list if is_possible_word(word, allowed_letters, yellow_letters)]
     return word_list
@@ -131,12 +150,12 @@ allowed_letters = [set(string.ascii_lowercase), set(string.ascii_lowercase), set
 yellow_letters = set()
 
 while count <= MAX_GUESSES:
-    user_guess = input("Enter your guess: ")
+    user_guess = input("Enter your guess: ").lower()
     guess_result = input('''Enter the result of your guess:
 g = Green
 y = Yellow
 x = Grey
-: ''')
+: ''').lower()
 
     word_list = filter_letters(user_guess, guess_result, word_list)
     best_guess = score_words(word_list, letter_freq)

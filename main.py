@@ -4,6 +4,13 @@ from collections import Counter
 import string
 from sys import argv
 
+# 5 Sets of the alphabet to filter down
+allowed_letters = [set(string.ascii_lowercase), set(string.ascii_lowercase), set(string.ascii_lowercase), set(string.ascii_lowercase), set(string.ascii_lowercase)]
+# Letters that exist in the word but are not in the correct position
+yellow_letters = set()
+MAX_GUESSES = 6
+count = 1
+
 def play_wordle():
 
     word_list = get_words("word_files/valid-wordle-words.txt")
@@ -11,18 +18,21 @@ def play_wordle():
     score_list = []
     letter_freq = letter_frequency(word_list)
 
-    # 5 Sets of the alphabet to filter down
-    allowed_letters = [set(string.ascii_lowercase), set(string.ascii_lowercase), set(string.ascii_lowercase), set(string.ascii_lowercase), set(string.ascii_lowercase)]
-    # Letters that exist in the word but are not in the correct position
-    yellow_letters = set()
-
     # Guesses taken from MITs paper
     # https://auction-upload-files.s3.amazonaws.com/Wordle_Paper_Final.pdf
     optimal_guesses = ["salet", "reast", "trace", "crate", "slate"]
 
     for guess in optimal_guesses:
         for answer in answer_list:
-            break
+            count = 1
+            while count <= MAX_GUESSES:
+                guess_result = guess_response(guess, answer)
+                if guess_result == "ggggg":
+                    print(f"Answer found in {count} tries")
+                    score_list.append(count) # How will I gather starting word statistics
+
+                word_list = filter_letters(guess, guess_result, word_list)
+                guess = score_words(word_list, letter_freq)
 
     return
 
@@ -76,6 +86,26 @@ def score_words(word_list: list, letter_freq: Counter):
     best_guess = max(word_scores, key=word_scores.get)
 
     return best_guess
+
+def guess_response(guess_word: str, answer_word: str):
+    # Function returns the comparison between the guess word and the answer word
+    # like the wordle website would
+    answer_word_letter_freq = {key: 0 for key in answer_word}
+    response = ""
+
+    for letter in answer_word:
+        answer_word_letter_freq[letter] += 1
+
+
+    for index, letter in enumerate(guess_word):
+        if letter == answer_word[index]:
+            response += "g"
+        elif letter in answer_word:
+            response += "y"
+        else:
+            response += "x"
+
+    return response
 
 def is_possible_word(word: str, allowed_letters: set, yellow_letters: set):
     # Function loops through each letter in a word and checks if it exists
@@ -133,31 +163,31 @@ def filter_letters(guess_word: str, guess_result: str, word_list: list):
 
     # Call function to filter the word list down
     word_list = find_possible_words(word_list, allowed_letters, yellow_letters)
-    print(word_list)
+
     return word_list
 
 
-# Main loop
-MAX_GUESSES = 6
-count = 1
+# # Main loop
+# MAX_GUESSES = 6
+# count = 1
 
-word_list = get_words("word_files/valid-wordle-words.txt")
-letter_freq = letter_frequency(word_list)
+# word_list = get_words("word_files/valid-wordle-words.txt")
+# letter_freq = letter_frequency(word_list)
 
-# 5 Sets of the alphabet to filter down
-allowed_letters = [set(string.ascii_lowercase), set(string.ascii_lowercase), set(string.ascii_lowercase), set(string.ascii_lowercase), set(string.ascii_lowercase)]
-# Letters that exist in the word but are not in the correct position
-yellow_letters = set()
+# # 5 Sets of the alphabet to filter down
+# allowed_letters = [set(string.ascii_lowercase), set(string.ascii_lowercase), set(string.ascii_lowercase), set(string.ascii_lowercase), set(string.ascii_lowercase)]
+# # Letters that exist in the word but are not in the correct position
+# yellow_letters = set()
 
-while count <= MAX_GUESSES:
-    user_guess = input("Enter your guess: ").lower()
-    guess_result = input('''Enter the result of your guess:
-g = Green
-y = Yellow
-x = Grey
-: ''').lower()
+# while count <= MAX_GUESSES:
+#     user_guess = input("Enter your guess: ").lower()
+#     guess_result = input('''Enter the result of your guess:
+# g = Green
+# y = Yellow
+# x = Grey
+# : ''').lower()
 
-    word_list = filter_letters(user_guess, guess_result, word_list)
-    best_guess = score_words(word_list, letter_freq)
-    print(f"Your best guess would be: {best_guess}\n")
-    count += 1
+#     word_list = filter_letters(user_guess, guess_result, word_list)
+#     best_guess = score_words(word_list, letter_freq)
+#     print(f"Your best guess would be: {best_guess}\n")
+#     count += 1

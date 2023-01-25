@@ -138,8 +138,8 @@ def filter_letters(guess_word: str, guess_result: str, word_list: list):
 
 
 # Main loop
-MAX_GUESSES = 5
-count = 0
+MAX_GUESSES = 6
+count = 1
 
 word_list = get_words("word_files/valid-wordle-words.txt")
 letter_freq = letter_frequency(word_list)
@@ -160,3 +160,4 @@ x = Grey
     word_list = filter_letters(user_guess, guess_result, word_list)
     best_guess = score_words(word_list, letter_freq)
     print(f"Your best guess would be: {best_guess}\n")
+    count += 1

@@ -5,9 +5,9 @@ import string
 from sys import argv
 import statistics as st
 
+
 MAX_GUESSES = 6
 count = 1
-
 
 def play_wordle():
 
@@ -20,11 +20,14 @@ def play_wordle():
     # https://auction-upload-files.s3.amazonaws.com/Wordle_Paper_Final.pdf
     optimal_guesses = ["salet", "reast", "trace", "crate", "slate"]
 
+    # Loop through the optimal guesses to gather statistics on best guess word with this algorithm
     for guess in optimal_guesses:
         initial_guess = guess
         score_list = []
 
+        # Loop through ever possible answer in the answer list and use it as the hidden word
         for answer in answer_list:
+            
             count = 1
             guess = initial_guess
             word_list_copy = word_list
@@ -33,9 +36,11 @@ def play_wordle():
             # Letters that exist in the word but are not in the correct position
             yellow_letters = set()
 
+            # Loop through solver until a solution is found
             while count <= MAX_GUESSES:
                 guess_result = guess_response(guess, answer)
 
+                # When a solution is found append it to the score list
                 if guess_result == "ggggg":
                     print(f"{initial_guess}: Answer found in {count} tries")
                     score_list.append(count)
@@ -46,10 +51,14 @@ def play_wordle():
                 count += 1
 
         score_dict[initial_guess] = score_list
+
     return
 
+
 def get_words(file: str):
-    # Define list to store 5 letter words
+    # Gets words from a txt file into a list
+
+    # Define list to store words
     word_list = []
 
     # Open file and read words into a list
@@ -60,7 +69,9 @@ def get_words(file: str):
 
     return word_list
 
+
 def game_statistics(score_dict: dict, answer_list: list):
+    # Returns game statistics for each optimal answer
 
     for starting_word, score_list in score_dict.items():
         max_score = max(score_list)
@@ -68,18 +79,18 @@ def game_statistics(score_dict: dict, answer_list: list):
         mean_score = st.mean(score_list)
         solved = (len(score_list) / len(answer_list)) * 100
 
-        write_string = f'''
-{starting_word} stats:
+        write_string = f'''{starting_word} stats:
 Minimum score: {min_score}
 Maximum score: {max_score}
 Average score: {mean_score}
 Solved wordles: {solved}
 '''
 
-        with open(f"{starting_word}_stats.txt", "w") as statsFile:
+        with open(f"stats/{starting_word}_stats.txt", "w") as statsFile:
             statsFile.write(write_string)
 
     return
+
 
 def letter_frequency(word_list: list):
 
@@ -96,6 +107,7 @@ def letter_frequency(word_list: list):
         letter_freq[letter] = value / total_letters
 
     return letter_freq
+
 
 def score_words(word_list: list, letter_freq: Counter):
 
@@ -120,6 +132,7 @@ def score_words(word_list: list, letter_freq: Counter):
 
     return best_guess
 
+
 def guess_response(guess_word: str, answer_word: str):
     # Function returns the comparison between the guess word and the answer word
     # like the wordle website would
@@ -139,6 +152,7 @@ def guess_response(guess_word: str, answer_word: str):
 
     return response
 
+
 def is_possible_word(word: str, allowed_letters: set, yellow_letters: set):
     # Function loops through each letter in a word and checks if it exists
     # or not in each set. If the letter does not exist in a possible solution
@@ -156,10 +170,12 @@ def is_possible_word(word: str, allowed_letters: set, yellow_letters: set):
             return False
     return True
 
+
 def find_possible_words(word_list: list, allowed_letters: set, yellow_letters: set):
     # Function builds a new list containing only possible words
     word_list = [word for word in word_list if is_possible_word(word, allowed_letters, yellow_letters)]
     return word_list
+
 
 def filter_letters(guess_word: str, guess_result: str, word_list: list, allowed_letters: list[set], yellow_letters: set):
     # Function filters letters from the set of letters allowed in each position

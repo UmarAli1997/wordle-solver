@@ -3,19 +3,17 @@
 from collections import Counter
 import string
 from sys import argv
+import statistics as st
 
-# 5 Sets of the alphabet to filter down
-allowed_letters = [set(string.ascii_lowercase), set(string.ascii_lowercase), set(string.ascii_lowercase), set(string.ascii_lowercase), set(string.ascii_lowercase)]
-# Letters that exist in the word but are not in the correct position
-yellow_letters = set()
 MAX_GUESSES = 6
 count = 1
+
 
 def play_wordle():
 
     word_list = get_words("word_files/valid-wordle-words.txt")
     answer_list = get_words("word_files/wordle-answers.txt")
-    score_list = []
+    score_dict = {}
     letter_freq = letter_frequency(word_list)
 
     # Guesses taken from MITs paper
@@ -23,17 +21,31 @@ def play_wordle():
     optimal_guesses = ["salet", "reast", "trace", "crate", "slate"]
 
     for guess in optimal_guesses:
+        initial_guess = guess
+        score_list = []
+
         for answer in answer_list:
             count = 1
+            guess = initial_guess
+            word_list_copy = word_list
+            # 5 Sets of the alphabet to filter down
+            allowed_letters = [set(string.ascii_lowercase), set(string.ascii_lowercase), set(string.ascii_lowercase), set(string.ascii_lowercase), set(string.ascii_lowercase)]
+            # Letters that exist in the word but are not in the correct position
+            yellow_letters = set()
+
             while count <= MAX_GUESSES:
                 guess_result = guess_response(guess, answer)
+
                 if guess_result == "ggggg":
-                    print(f"Answer found in {count} tries")
-                    score_list.append(count) # How will I gather starting word statistics
+                    print(f"{initial_guess}: Answer found in {count} tries")
+                    score_list.append(count)
+                    break
 
-                word_list = filter_letters(guess, guess_result, word_list)
-                guess = score_words(word_list, letter_freq)
+                word_list_copy = filter_letters(guess, guess_result, word_list_copy, allowed_letters, yellow_letters)
+                guess = score_words(word_list_copy, letter_freq)
+                count += 1
 
+        score_dict[initial_guess] = score_list
     return
 
 def get_words(file: str):
@@ -47,6 +59,27 @@ def get_words(file: str):
             word_list.append(word)
 
     return word_list
+
+def game_statistics(score_dict: dict, answer_list: list):
+
+    for starting_word, score_list in score_dict.items():
+        max_score = max(score_list)
+        min_score = min(score_list)
+        mean_score = st.mean(score_list)
+        solved = (len(score_list) / len(answer_list)) * 100
+
+        write_string = f'''
+{starting_word} stats:
+Minimum score: {min_score}
+Maximum score: {max_score}
+Average score: {mean_score}
+Solved wordles: {solved}
+'''
+
+        with open(f"{starting_word}_stats.txt", "w") as statsFile:
+            statsFile.write(write_string)
+
+    return
 
 def letter_frequency(word_list: list):
 
@@ -96,7 +129,6 @@ def guess_response(guess_word: str, answer_word: str):
     for letter in answer_word:
         answer_word_letter_freq[letter] += 1
 
-
     for index, letter in enumerate(guess_word):
         if letter == answer_word[index]:
             response += "g"
@@ -129,7 +161,7 @@ def find_possible_words(word_list: list, allowed_letters: set, yellow_letters: s
     word_list = [word for word in word_list if is_possible_word(word, allowed_letters, yellow_letters)]
     return word_list
 
-def filter_letters(guess_word: str, guess_result: str, word_list: list):
+def filter_letters(guess_word: str, guess_result: str, word_list: list, allowed_letters: list[set], yellow_letters: set):
     # Function filters letters from the set of letters allowed in each position
     # x = Grey, letter does not exist in the solution
     # y = Yellow, letter does exist in the solution but is not in the correct index
@@ -165,6 +197,8 @@ def filter_letters(guess_word: str, guess_result: str, word_list: list):
     word_list = find_possible_words(word_list, allowed_letters, yellow_letters)
 
     return word_list
+
+play_wordle()
 
 
 # # Main loop

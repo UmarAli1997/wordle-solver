@@ -1,6 +1,0 @@
-
-trace stats:
-Minimum score: 1
-Maximum score: 6
-Average score: 4.272769733769267
-Solved wordles: 92.72412299696839

@@ -9,6 +9,7 @@ import statistics as st
 MAX_GUESSES = 6
 count = 1
 
+
 def play_wordle():
 
     word_list = get_words("word_files/valid-wordle-words.txt")
@@ -27,7 +28,7 @@ def play_wordle():
 
         # Loop through ever possible answer in the answer list and use it as the hidden word
         for answer in answer_list:
-            
+
             count = 1
             guess = initial_guess
             word_list_copy = word_list
@@ -42,7 +43,7 @@ def play_wordle():
 
                 # When a solution is found append it to the score list
                 if guess_result == "ggggg":
-                    print(f"{initial_guess}: Answer found in {count} tries")
+                    print(f"{initial_guess}/{answer}: Answer found in {count} tries")
                     score_list.append(count)
                     break
 
@@ -92,6 +93,26 @@ Solved wordles: {solved}
     return
 
 
+def guess_response(guess_word: str, answer_word: str):
+    # Function returns the comparison between the guess word and the answer word
+    # like the wordle website would
+    # answer_word_letter_freq = {key: 0 for key in answer_word}
+    response = ""
+
+    # for letter in answer_word:
+    #     answer_word_letter_freq[letter] += 1
+
+    for index, letter in enumerate(guess_word):
+        if letter == answer_word[index]:
+            response += "g"
+        elif letter in answer_word:
+            response += "y"
+        else:
+            response += "x"
+
+    return response
+
+
 def letter_frequency(word_list: list):
 
     # Loops through words and adds each letter to the variable to give a dictionary of letter frequency
@@ -131,26 +152,6 @@ def score_words(word_list: list, letter_freq: Counter):
     best_guess = max(word_scores, key=word_scores.get)
 
     return best_guess
-
-
-def guess_response(guess_word: str, answer_word: str):
-    # Function returns the comparison between the guess word and the answer word
-    # like the wordle website would
-    answer_word_letter_freq = {key: 0 for key in answer_word}
-    response = ""
-
-    for letter in answer_word:
-        answer_word_letter_freq[letter] += 1
-
-    for index, letter in enumerate(guess_word):
-        if letter == answer_word[index]:
-            response += "g"
-        elif letter in answer_word:
-            response += "y"
-        else:
-            response += "x"
-
-    return response
 
 
 def is_possible_word(word: str, allowed_letters: set, yellow_letters: set):

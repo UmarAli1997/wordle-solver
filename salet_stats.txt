@@ -1,0 +1,6 @@
+
+salet stats:
+Minimum score: 2
+Maximum score: 6
+Average score: 4.312323612417686
+Solved wordles: 92.0744911216977

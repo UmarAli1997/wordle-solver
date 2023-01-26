@@ -1,0 +1,6 @@
+
+reast stats:
+Minimum score: 2
+Maximum score: 6
+Average score: 4.286115007012623
+Solved wordles: 92.63750541359896

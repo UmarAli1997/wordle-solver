@@ -1,0 +1,6 @@
+
+crate stats:
+Minimum score: 1
+Maximum score: 6
+Average score: 4.2891172349369455
+Solved wordles: 92.72412299696839

@@ -13,9 +13,10 @@ count = 1
 def play_wordle():
 
     word_list = get_words("word_files/valid-wordle-words.txt")
-    answer_list = get_words("word_files/wordle-answers.txt")
-    score_dict = {}
+    answer_list = get_words("word_files/answers.txt")
     letter_freq = letter_frequency(word_list)
+    score_dict = {}
+    
 
     # Guesses taken from MITs paper
     # https://auction-upload-files.s3.amazonaws.com/Wordle_Paper_Final.pdf
@@ -52,6 +53,8 @@ def play_wordle():
                 count += 1
 
         score_dict[initial_guess] = score_list
+
+    game_statistics(score_dict, answer_list)
 
     return
 
@@ -96,16 +99,16 @@ Solved wordles: {solved}
 def guess_response(guess_word: str, answer_word: str):
     # Function returns the comparison between the guess word and the answer word
     # like the wordle website would
-    # answer_word_letter_freq = {key: 0 for key in answer_word}
+    answer_word_letter_freq = {key: 0 for key in answer_word}
     response = ""
 
-    # for letter in answer_word:
-    #     answer_word_letter_freq[letter] += 1
+    for letter in answer_word:
+        answer_word_letter_freq[letter] += 1
 
     for index, letter in enumerate(guess_word):
-        if letter == answer_word[index]:
+        if letter == answer_word[index] and answer_word_letter_freq[letter] > 0:
             response += "g"
-        elif letter in answer_word:
+        elif letter in answer_word and answer_word_letter_freq[letter] > 0:
             response += "y"
         else:
             response += "x"
